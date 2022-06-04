@@ -32,7 +32,7 @@ const Schema = new mongoose.Schema(
       required: true,
     },
     people: {
-      type: String,
+      type: Number,
       required: true,
     },
     pool: {
