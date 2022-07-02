@@ -14,6 +14,10 @@ const Schema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    email: {
+      type: String,
+      required: true,
+    },
     people: {
       type: Number,
       required: true,
@@ -22,12 +26,12 @@ const Schema = new mongoose.Schema(
       type: String,
       default: "none",
     },
-    services: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    // services: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "User",
+    //   },
+    // ],
     checkin: {
       type: Date,
       required: true,

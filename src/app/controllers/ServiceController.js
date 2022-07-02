@@ -7,7 +7,7 @@ class ServiceController {
     res.send("create service");
   }
 
-  //POST /services/create
+  //POST /services
   async postCreate(req, res, next) {
     try {
       const service = new Service({
@@ -22,23 +22,43 @@ class ServiceController {
   }
 
   async delete(req, res, next) {
-    const service = await Service.findByIdAndDelete({ _id: req.params.id });
-    res.send("delete successfully");
+    try {
+      const service = await Service.findByIdAndDelete({ _id: req.params.id });
+      res.send("delete successfully");
+    } catch (e) {
+      console.log(e);
+      res.status(400).send(e);
+    }
   }
 
   async getService(req, res, next) {
-    const service = await Service.findById(req.params.id);
-    res.send(service);
+    try {
+      const service = await Service.findById(req.params.id);
+      res.status(200).send({ service });
+    } catch (e) {
+      console.log(e);
+      res.status(400).send(e);
+    }
   }
 
-  async postUpdate(req, res, next) {
+  async getServicesByHomestay(req, res, next) {
+    try {
+      const services = await Service.find({ homestay: req.params.homestayId });
+      res.status(200).send({ services });
+    } catch (e) {
+      console.log(e);
+      res.status(400).send(e);
+    }
+  }
+
+  async update(req, res, next) {
     const updates = Object.keys(req.body);
     console.log("oke");
     const service = await Service.findById(req.params.id);
     try {
       updates.forEach((update) => (service[update] = req.body[update]));
       await service.save();
-      res.send(service);
+      res.send({ service });
     } catch (e) {
       res.status(400).send(e);
     }

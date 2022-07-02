@@ -3,9 +3,8 @@ const User = require("../models/user");
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.header("Authorization").replace("Bearer ", "");
-    // const token = req.cookies.authToken;
-    // console.log(token)
+    const token = req.headers.authorization.replace("Bearer ", "");
+    // const token = req.header("Authorization").replace("Bearer ", "");
     const decoded = jwt.verify(token, "homestay");
     const user = await User.findOne({
       _id: decoded._id,

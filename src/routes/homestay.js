@@ -17,12 +17,21 @@ const upload = multer({
   },
 });
 //create
-router.post("", upload.array("image"), HomestayController.create);
+router.post("", auth, upload.array("image"), HomestayController.create);
+//:id
+router.post(
+  "/:id",
+  auth,
+  upload.array("files"),
+  HomestayController.uploadFiles
+);
 //update
-router.patch("/update", HomestayController.update);
+router.put("/:id", auth, HomestayController.update);
 //get homestay
-router.get("/:id", auth, HomestayController.getHomestay);
+router.get("/:id", HomestayController.getHomestay);
 //get image ?index=1
-router.get(":id/images", auth, HomestayController.getHomestay);
+router.get("/:id/images", HomestayController.getImage);
+// get homestays?userid=...
+router.get("", auth, HomestayController.getList);
 
 module.exports = router;
