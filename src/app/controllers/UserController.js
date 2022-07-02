@@ -37,6 +37,15 @@ class UserController {
       console.log("Error: " + e);
     }
   }
+
+  async getCurrentUser(req, res) {
+    try {
+      res.send(req.user);
+    } catch (e) {
+      res.status(400).send(e);
+      console.log("Error: " + e);
+    }
+  }
   async logout(req, res) {
     try {
       req.user.tokens = req.user.tokens.filter((token) => {

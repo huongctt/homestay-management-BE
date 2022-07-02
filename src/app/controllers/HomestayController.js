@@ -2,6 +2,8 @@ const express = require("express");
 const Homestay = require("../models/homestay.js");
 const User = require("../models/user.js");
 const Review = require("../models/review.js");
+const sharp = require("sharp");
+
 class HomestayController {
   async create(req, res) {
     const homestay = new Homestay({
@@ -17,10 +19,29 @@ class HomestayController {
         homestay.images.push(buffer);
       }
     }
-    // console.log(homestay)
     try {
       await homestay.save();
-      res.send(homestay);
+      res.status(201).send(homestay);
+    } catch (e) {
+      res.status(400).send(e);
+      console.log("Error: " + e);
+    }
+  }
+
+  async uploadFiles(req, res) {
+    const homestay = await Homestay.findById(req.params.id);
+    if (req.files) {
+      for (let i = 0; i < req.files.length; i++) {
+        const buffer = await sharp(req.files[i].buffer)
+          .resize({ width: 550, height: 500 })
+          .png()
+          .toBuffer();
+        homestay.images.push(buffer);
+      }
+    }
+    try {
+      await homestay.save();
+      res.status(201).send(homestay);
     } catch (e) {
       res.status(400).send(e);
       console.log("Error: " + e);
@@ -116,8 +137,6 @@ class HomestayController {
 
   async delete(req, res) {
     try {
-      console.log("delete");
-      //const task = await Task.findByIdAndDelete(req.params.id)
       const homestay = await Homestay.findByIdAndDelete({
         _id: req.params.id,
         owner: req.user._id,
@@ -129,7 +148,16 @@ class HomestayController {
         message: "delete successfully",
       });
     } catch (e) {
-      res.status(500).send();
+      res.status(400).send();
+    }
+  }
+
+  async getList(req, res) {
+    try {
+      const homestays = await Homestay.find({ owner: req.query.userid });
+      res.status(200).send({ homestays: homestays });
+    } catch (e) {
+      res.status(400).send();
     }
   }
 }
