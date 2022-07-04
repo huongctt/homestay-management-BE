@@ -26,12 +26,6 @@ const Schema = new mongoose.Schema(
       type: String,
       default: "none",
     },
-    // services: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "User",
-    //   },
-    // ],
     checkin: {
       type: Date,
       required: true,

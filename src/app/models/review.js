@@ -10,7 +10,7 @@ const Schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Homestay",
     },
-    review: {
+    comment: {
       type: String,
     },
     rate: {

@@ -3,6 +3,8 @@ const Homestay = require("../models/homestay.js");
 const User = require("../models/user.js");
 const Review = require("../models/review.js");
 const Booking = require("../models/booking.js");
+const ServiceBooking = require("../models/serviceBooking.js");
+const Service = require("../models/service.js");
 const sharp = require("sharp");
 
 class BookingController {
@@ -53,7 +55,6 @@ class BookingController {
       var datecheckout = new Date(req.body.checkout);
       var date = (datecheckout - datecheckin) / (60 * 60 * 24 * 1000);
       booking.money = homestay.price * date;
-      console.log({ booking });
       await booking.save();
       res.status(201).send({ booking });
     } catch (e) {
@@ -128,10 +129,9 @@ class BookingController {
         },
       });
     } else {
-      //requested
       bookingList = await Booking.find({
         homestay: req.params.homestayId,
-        status: "requested",
+        status: tab,
       });
     }
     for (var i = 0; i < bookingList.length; i++) {
@@ -145,6 +145,120 @@ class BookingController {
       homestay,
       bookingList,
     });
+  }
+
+  async getBooking(req, res) {
+    try {
+      const booking = await Booking.findById(req.params.id);
+      await booking
+        .populate({
+          path: "user",
+        })
+        .execPopulate();
+      await booking
+        .populate({
+          path: "homestay",
+        })
+        .execPopulate();
+
+      const services = await Service.find({ homestay: booking.homestay._id });
+      const servicesBooking = await ServiceBooking.find({
+        booking: booking._id,
+      });
+      for (let i = 0; i < servicesBooking.length; i++) {
+        await servicesBooking[i]
+          .populate({
+            path: "service",
+          })
+          .execPopulate();
+      }
+      res.status(200).send({ booking, services, servicesBooking });
+    } catch (e) {
+      console.log(e);
+      res.status(400).send(e);
+    }
+  }
+
+  async update(req, res) {
+    try {
+      const updates = Object.keys(req.body);
+      const keys = updates.filter((item) => item !== "services");
+      const statuses = [
+        "requested",
+        "accepted",
+        "stayed",
+        "declined",
+        "reviewed",
+      ];
+      const booking = await Booking.findById(req.params.id);
+      const homestay = await Homestay.findById(booking.homestay);
+      if (
+        req.body.status === "stayed" &&
+        statuses.indexOf(homestay.status) < statuses.indexOf(req.body.status)
+      ) {
+        homestay.bookingNumber = homestay.bookingNumber + 1;
+      }
+      await homestay.save();
+      //update info
+      keys.forEach((update) => (booking[update] = req.body[update]));
+      await booking.save();
+      //update service
+      const serviceBookings = req.body.services;
+      for (let i = 0; i < serviceBookings.length; i++) {
+        if (serviceBookings[i]._id === "new") {
+          const serviceBooking = new ServiceBooking({
+            booking: req.params.id,
+            homestay: req.body.homestay,
+            service: serviceBookings[i].service._id,
+            quantity: serviceBookings[i].quantity,
+            money: serviceBookings[i].money,
+          });
+          await serviceBooking.save();
+        } else {
+          const serviceBooking = await ServiceBooking.findById(
+            serviceBookings[i]._id
+          );
+          serviceBooking.quantity = serviceBookings[i].quantity;
+          serviceBooking.money = serviceBookings[i].money;
+          await serviceBooking.save();
+        }
+      }
+
+      res.status(200).send({ booking });
+    } catch (e) {
+      console.log(e);
+      res.status(400).send(e);
+    }
+  }
+  async getYourBooking(req, res) {
+    try {
+      const bookings = await Booking.find({ user: req.user });
+      const list = [];
+      for (var i = 0; i < bookings.length; i++) {
+        await bookings[i]
+          .populate({
+            path: "homestay",
+          })
+          .execPopulate();
+      }
+      bookings.sort((a, b) => b.createdAt - a.createdAt);
+      res.status(200).send({ user: req.user, bookings });
+    } catch (e) {
+      res.status(400).send(e);
+      console.log(e);
+    }
+  }
+
+  async deleteService(req, res, next) {
+    try {
+      const service = await ServiceBooking.findByIdAndDelete({
+        _id: req.params.id,
+      });
+      res.status(200).send("delete successfully");
+    } catch (e) {
+      console.log(e);
+      res.status(400).send(e);
+    }
   }
 }
 

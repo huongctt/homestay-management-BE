@@ -8,7 +8,8 @@ const Schema = new mongoose.Schema(
     },
     images: [
       {
-        type: Buffer,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Image",
       },
     ],
     owner: {
@@ -33,6 +34,11 @@ const Schema = new mongoose.Schema(
     },
     people: {
       type: Number,
+      required: true,
+    },
+    bookingNumber: {
+      type: Number,
+      default: 0,
       required: true,
     },
     pool: {

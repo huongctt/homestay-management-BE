@@ -2,6 +2,7 @@ const express = require("express");
 const Homestay = require("../models/homestay.js");
 const User = require("../models/user.js");
 const Review = require("../models/review.js");
+const Image = require("../models/image.js");
 const sharp = require("sharp");
 
 class HomestayController {
@@ -29,17 +30,21 @@ class HomestayController {
   }
 
   async uploadFiles(req, res) {
-    const homestay = await Homestay.findById(req.params.id);
-    if (req.files) {
-      for (let i = 0; i < req.files.length; i++) {
-        const buffer = await sharp(req.files[i].buffer)
-          .resize({ width: 550, height: 500 })
-          .png()
-          .toBuffer();
-        homestay.images.push(buffer);
-      }
-    }
     try {
+      const homestay = await Homestay.findById(req.params.id);
+      if (req.files) {
+        for (let i = 0; i < req.files.length; i++) {
+          const buffer = await sharp(req.files[i].buffer)
+            .resize({ width: 550, height: 500 })
+            .png()
+            .toBuffer();
+          const image = new Image({
+            buffer: buffer,
+          });
+          await image.save();
+          homestay.images.push(image);
+        }
+      }
       await homestay.save();
       res.status(201).send(homestay);
     } catch (e) {
@@ -54,8 +59,9 @@ class HomestayController {
       if (!homestay || homestay.images.length == 0) {
         throw new Error();
       } else {
+        const image = await Image.findById(homestay.images[req.query.index]);
         res.set("Content-Type", "image/png");
-        res.send(homestay.images[req.query.index]);
+        res.send(image.buffer);
       }
     } catch (e) {
       res.status(404).send();
@@ -132,6 +138,7 @@ class HomestayController {
       res.status(200).send(homestay);
     } catch (e) {
       res.status(400).send(e);
+      console.log(e);
     }
   }
 
