@@ -68,83 +68,136 @@ class BookingController {
     var bookingList = [];
     var date;
     const tab = req.query.tab;
+    try {
+      if (tab != "stayed") {
+        if (req.query.username && req.query.time) {
+          var username = req.query.username;
+          if (req.query.time == "thisweek") {
+            date = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
+          } else if (req.query.time == "thismonth") {
+            date = new Date(new Date() - 30 * 60 * 60 * 24 * 1000);
+          }
+          var users = await User.find({
+            name: { $regex: username, $options: "i" },
+          });
+          var ids = users.map(function (user) {
+            return user._id;
+          });
+          bookingList = await Booking.find({
+            homestay: req.params.homestayId,
+            status: tab,
+            user: { $in: ids },
+            createdAt: {
+              $lte: new Date(),
+              $gte: date,
+            },
+          });
+        } else if (req.query.username) {
+          var username = req.query.username;
+          var users = await User.find({
+            name: { $regex: username, $options: "i" },
+          });
+          var ids = users.map(function (user) {
+            return user._id;
+          });
+          bookingList = await Booking.find({
+            homestay: req.params.homestayId,
+            status: tab,
+            user: { $in: ids },
+          });
+        } else if (req.query.time) {
+          if (req.query.time == "thisweek") {
+            date = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
+          } else if (req.query.time == "thismonth") {
+            date = new Date(new Date() - 30 * 60 * 60 * 24 * 1000);
+          }
+          bookingList = await Booking.find({
+            homestay: req.params.homestayId,
+            status: tab,
+            createdAt: {
+              $lte: new Date(),
+              $gte: date,
+            },
+          });
+        } else {
+          bookingList = await Booking.find({
+            homestay: req.params.homestayId,
+            status: tab,
+          });
+        }
+      } else {
+        if (req.query.username && req.query.time) {
+          var username = req.query.username;
+          if (req.query.time == "thisweek") {
+            date = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
+          } else if (req.query.time == "thismonth") {
+            date = new Date(new Date() - 30 * 60 * 60 * 24 * 1000);
+          }
+          var users = await User.find({
+            name: { $regex: username, $options: "i" },
+          });
+          var ids = users.map(function (user) {
+            return user._id;
+          });
+          bookingList = await Booking.find({
+            homestay: req.params.homestayId,
+            status: { $in: ["stayed", "reviewed"] },
+            user: { $in: ids },
+            createdAt: {
+              $lte: new Date(),
+              $gte: date,
+            },
+          });
+        } else if (req.query.username) {
+          var username = req.query.username;
+          var users = await User.find({
+            name: { $regex: username, $options: "i" },
+          });
+          var ids = users.map(function (user) {
+            return user._id;
+          });
+          bookingList = await Booking.find({
+            homestay: req.params.homestayId,
+            status: { $in: ["stayed", "reviewed"] },
+            user: { $in: ids },
+          });
+        } else if (req.query.time) {
+          if (req.query.time == "thisweek") {
+            date = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
+          } else if (req.query.time == "thismonth") {
+            date = new Date(new Date() - 30 * 60 * 60 * 24 * 1000);
+          }
+          bookingList = await Booking.find({
+            homestay: req.params.homestayId,
+            status: { $in: ["stayed", "reviewed"] },
+            createdAt: {
+              $lte: new Date(),
+              $gte: date,
+            },
+          });
+        } else {
+          bookingList = await Booking.find({
+            homestay: req.params.homestayId,
+            status: { $in: ["stayed", "reviewed"] },
+          });
+        }
+      }
 
-    if (req.query.username && req.query.time) {
-      var username = req.query.username;
-      if (req.query.time == "thisweek") {
-        date = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
-      } else if (req.query.time == "thismonth") {
-        date = new Date(new Date() - 30 * 60 * 60 * 24 * 1000);
+      for (var i = 0; i < bookingList.length; i++) {
+        await bookingList[i]
+          .populate({
+            path: "user",
+          })
+          .execPopulate();
       }
-      try {
-        var users = await User.find({
-          name: { $regex: username, $options: "i" },
-        });
-        var ids = users.map(function (user) {
-          return user._id;
-        });
-        bookingList = await Booking.find({
-          homestay: req.params.homestayId,
-          status: tab,
-          user: { $in: ids },
-          createdAt: {
-            $lte: new Date(),
-            $gte: date,
-          },
-        });
-      } catch (e) {
-        res.status(500).send();
-        console.log(e);
-      }
-    } else if (req.query.username) {
-      var username = req.query.username;
-      try {
-        var users = await User.find({
-          name: { $regex: username, $options: "i" },
-        });
-        var ids = users.map(function (user) {
-          return user._id;
-        });
-        bookingList = await Booking.find({
-          homestay: req.params.homestayId,
-          status: tab,
-          user: { $in: ids },
-        });
-      } catch (e) {
-        res.status(500).send();
-        console.log(e);
-      }
-    } else if (req.query.time) {
-      if (req.query.time == "thisweek") {
-        date = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
-      } else if (req.query.time == "thismonth") {
-        date = new Date(new Date() - 30 * 60 * 60 * 24 * 1000);
-      }
-      bookingList = await Booking.find({
-        homestay: req.params.homestayId,
-        status: tab,
-        createdAt: {
-          $lte: new Date(),
-          $gte: date,
-        },
+      res.status(200).send({
+        homestay,
+        bookingList,
       });
-    } else {
-      bookingList = await Booking.find({
-        homestay: req.params.homestayId,
-        status: tab,
-      });
+    } catch (e) {
+      res.status(500).send();
+      console.log(e);
     }
-    for (var i = 0; i < bookingList.length; i++) {
-      await bookingList[i]
-        .populate({
-          path: "user",
-        })
-        .execPopulate();
-    }
-    res.status(200).send({
-      homestay,
-      bookingList,
-    });
   }
 
   async getBooking(req, res) {

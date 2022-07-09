@@ -41,6 +41,11 @@ const Schema = new mongoose.Schema(
       default: 0,
       required: true,
     },
+    rate: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
     pool: {
       type: Boolean,
     },

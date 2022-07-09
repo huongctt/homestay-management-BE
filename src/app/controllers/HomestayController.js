@@ -81,46 +81,9 @@ class HomestayController {
             path: "homestays",
           })
           .execPopulate();
-        // const reviews = await Review.find({ homestay: req.params.id });
-        // var totalStar = 0;
-        // var averageRate = 0;
-        // var totalGuests = 0;
-        // for (var review of reviews) {
-        //   await review
-        //     .populate({
-        //       path: "user",
-        //     })
-        //     .execPopulate();
-        //   totalStar += review.rate;
-        // }
-        // if (reviews.length != 0) {
-        //   averageRate = totalStar / reviews.length;
-        // }
-        // const guests = await Booking.aggregate([
-        //   {
-        //     $match: {
-        //       homestay: ObjectId(req.params.id),
-        //       status: { $in: ["stayed", "reviewed"] },
-        //     },
-        //   },
-        //   {
-        //     $group: {
-        //       _id: { _id: ObjectId(req.params.id) },
-        //       total: { $sum: "$people" },
-        //     },
-        //   },
-        // ]);
-        // if (guests.length != 0) {
-        //   totalGuests = guests[0].total;
-        // }
-
-        // reviews.sort((a, b) => b.createdAt - a.createdAt);
         res.send({
           homestay: homestay,
           owner: owner,
-          // reviews: reviews,
-          // averageRate,
-          // totalGuests,
         });
       }
     } catch (e) {

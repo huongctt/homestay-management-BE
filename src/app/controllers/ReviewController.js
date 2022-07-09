@@ -13,9 +13,9 @@ class ReviewController {
         homestay: booking.homestay,
         user: req.user,
       });
-      // await review.save();
-      // booking.status = "reviewed";
-      // await booking.save();
+      await review.save();
+      booking.status = "reviewed";
+      await booking.save();
       res.status(201).send({ review });
     } catch (e) {
       res.status(400).send(e);
@@ -25,16 +25,22 @@ class ReviewController {
   async getAllByHomestayId(req, res) {
     try {
       const reviews = await Review.find({ homestay: req.params.homestayId });
+      let avg = 0;
+      let total = 0;
       for (let i = 0; i < reviews.length; i++) {
         await reviews[i]
           .populate({
             path: "user",
           })
           .execPopulate();
+        total += reviews[i].rate;
       }
-      res.status(200).send({ reviews });
+      avg = total / reviews.length;
+      reviews.sort((a, b) => b.createdAt - a.createdAt);
+      res.status(200).send({ reviews, averageStar: avg });
     } catch (e) {
       res.status(400).send(e);
+      console.log(e);
     }
   }
 }

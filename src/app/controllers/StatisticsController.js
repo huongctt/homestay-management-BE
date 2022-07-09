@@ -13,7 +13,6 @@ class StatisticsController {
     let filter = "";
     var quarterList = [0, 0, 0, 0];
     var type = "Type";
-    console.log(req.query);
     try {
       const homestay = await Homestay.findById(req.params.id);
       if (req.query.type == "Money") {
