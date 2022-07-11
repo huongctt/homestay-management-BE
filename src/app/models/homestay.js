@@ -28,6 +28,16 @@ const Schema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    longitude: {
+      type: Number,
+      required: true,
+      default: 105.84713,
+    },
+    latitude: {
+      type: Number,
+      required: true,
+      default: 21.030653,
+    },
     price: {
       type: Number,
       required: true,

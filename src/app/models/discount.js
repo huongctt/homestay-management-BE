@@ -6,17 +6,13 @@ const Schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    homestay: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Homestay",
-      },
-    ],
+    homestays: [{ type: mongoose.Schema.Types.ObjectId, ref: "Homestay" }],
     quantity: {
       type: Number,
     },
     used: {
       type: Number,
+      default: 0,
     },
     percentage: {
       type: Number,

@@ -39,6 +39,13 @@ const Schema = new mongoose.Schema(
       enum: ["requested", "accepted", "stayed", "declined", "reviewed"],
       required: true,
     },
+    discount: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Discount",
+    },
+    discountMoney: {
+      type: Number,
+    },
     money: {
       type: Number,
     },

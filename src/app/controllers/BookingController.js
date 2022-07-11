@@ -5,6 +5,7 @@ const Review = require("../models/review.js");
 const Booking = require("../models/booking.js");
 const ServiceBooking = require("../models/serviceBooking.js");
 const Service = require("../models/service.js");
+const Discount = require("../models/discount.js");
 const sharp = require("sharp");
 
 class BookingController {
@@ -51,10 +52,16 @@ class BookingController {
         homestay: homestay._id,
         status: "requested",
       });
-      var datecheckin = new Date(req.body.checkin);
-      var datecheckout = new Date(req.body.checkout);
-      var date = (datecheckout - datecheckin) / (60 * 60 * 24 * 1000);
-      booking.money = homestay.price * date;
+      if (req.body.discount) {
+        const discount = await Discount.findById(req.body.discount);
+        discount.used = discount.used + 1;
+        await discount.save();
+      }
+      console.log({ booking });
+      // var datecheckin = new Date(req.body.checkin);
+      // var datecheckout = new Date(req.body.checkout);
+      // var date = (datecheckout - datecheckin) / (60 * 60 * 24 * 1000);
+      // booking.money = homestay.price * date;
       await booking.save();
       res.status(201).send({ booking });
     } catch (e) {
