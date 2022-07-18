@@ -6,6 +6,7 @@ const Booking = require("../models/booking.js");
 const ServiceBooking = require("../models/serviceBooking.js");
 const Service = require("../models/service.js");
 const Discount = require("../models/discount.js");
+const Notification = require("../models/notification.js");
 const sharp = require("sharp");
 
 class BookingController {
@@ -252,16 +253,42 @@ class BookingController {
       ];
       const booking = await Booking.findById(req.params.id);
       const homestay = await Homestay.findById(booking.homestay);
+      //update number of booking
       if (
         req.body.status === "stayed" &&
         statuses.indexOf(homestay.status) < statuses.indexOf(req.body.status)
       ) {
         homestay.bookingNumber = homestay.bookingNumber + 1;
+        const noti = new Notification({
+          message: `You stayed in ${homestay.name}! Please let us know whether you have a wonderful vacation`,
+          user: booking.user,
+        });
+        await noti.save();
       }
       await homestay.save();
       //update info
       keys.forEach((update) => (booking[update] = req.body[update]));
       await booking.save();
+      //create notification
+      if (
+        req.body.status === "accepted" &&
+        statuses.indexOf(homestay.status) < statuses.indexOf(req.body.status)
+      ) {
+        const noti = new Notification({
+          message: `Your booking of homestay ${homestay.name} have been accepted!`,
+          user: booking.user,
+        });
+        await noti.save();
+      } else if (
+        req.body.status === "declined" &&
+        statuses.indexOf(homestay.status) < statuses.indexOf(req.body.status)
+      ) {
+        const noti = new Notification({
+          message: `Your booking of homestay ${homestay.name} have been declined!`,
+          user: booking.user,
+        });
+        await noti.save();
+      }
       //update service
       const serviceBookings = req.body.services;
       for (let i = 0; i < serviceBookings.length; i++) {

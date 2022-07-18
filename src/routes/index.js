@@ -4,6 +4,7 @@ const ServiceRouter = require("./service");
 const BookingRouter = require("./booking");
 const ReviewRouter = require("./review");
 const DisocuntRouter = require("./discount");
+const NotificationRouter = require("./notification");
 const StatisticsRouter = require("./statistics");
 const auth = require("../app/middleware/auth");
 
@@ -14,6 +15,7 @@ function route(app) {
   app.use("/statistics", StatisticsRouter);
   app.use("/reviews", ReviewRouter);
   app.use("/discounts", DisocuntRouter);
+  app.use("/notifications", NotificationRouter);
   app.use("", BookingRouter);
 }
 
