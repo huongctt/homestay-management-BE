@@ -9,4 +9,6 @@ router.post("/send-messages", auth, chatController.sendMessage);
 
 router.post("/load-messages", auth, chatController.loadMessages);
 
+router.get("/your-chats", auth, chatController.yourChats);
+
 module.exports = router;

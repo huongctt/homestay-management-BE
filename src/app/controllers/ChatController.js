@@ -9,7 +9,7 @@ class ChatController {
     try {
       let chat;
       chat = await Chat.findOne({
-        users: { $in: [req.body.from, req.body.to] },
+        users: { $all: [req.body.from, req.body.to] },
       });
       if (!chat) {
         chat = new Chat({
@@ -36,6 +36,22 @@ class ChatController {
         to: { $in: req.body.users },
       });
       res.status(200).send({ messages });
+    } catch (e) {
+      console.log(e);
+      res.status(400).send(e);
+    }
+  }
+
+  async yourChats(req, res) {
+    try {
+      const chats = await Chat.find({
+        users: { $in: [req.user._id] },
+      })
+        .populate({
+          path: "users lastMessage",
+        })
+        .sort({ updatedAt: -1 });
+      res.status(200).send({ chats });
     } catch (e) {
       console.log(e);
       res.status(400).send(e);
