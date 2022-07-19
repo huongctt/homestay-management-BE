@@ -6,6 +6,7 @@ const ReviewRouter = require("./review");
 const DisocuntRouter = require("./discount");
 const NotificationRouter = require("./notification");
 const StatisticsRouter = require("./statistics");
+const ChatRouter = require("./chat");
 const auth = require("../app/middleware/auth");
 
 function route(app) {
@@ -16,6 +17,7 @@ function route(app) {
   app.use("/reviews", ReviewRouter);
   app.use("/discounts", DisocuntRouter);
   app.use("/notifications", NotificationRouter);
+  app.use("/chats", ChatRouter);
   app.use("", BookingRouter);
 }
 

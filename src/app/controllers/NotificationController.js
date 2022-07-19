@@ -8,8 +8,13 @@ class NotificationController {
   async getAll(req, res) {
     try {
       const noti = await Notification.find({ user: req.user._id });
-      const notSeen = noti.some((nt) => nt.seen === false);
-      res.status(200).send({ notifications: noti, notSeen });
+      const notSeen = noti.filter((nt) => nt.seen === false);
+      for (let i = 0; i < notSeen.length; i++) {
+        const nt = await Notification.findById(notSeen[i]._id);
+        nt.seen = true;
+        await nt.save();
+      }
+      res.status(200).send({ notifications: noti });
     } catch (e) {
       res.status(404).send();
       console.log(e);

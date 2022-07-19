@@ -58,6 +58,14 @@ class UserController {
       res.status(500).send();
     }
   }
+  async getUserInfo(req, res) {
+    try {
+      const user = await User.findById(req.params.id);
+      res.status(200).send({ user });
+    } catch (e) {
+      res.status(400).send(e);
+    }
+  }
 }
 
 module.exports = new UserController();
