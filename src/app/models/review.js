@@ -16,6 +16,10 @@ const Schema = new mongoose.Schema(
     rate: {
       type: Number,
     },
+    image: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Image",
+    },
   },
   {
     timestamps: true,

@@ -57,7 +57,7 @@ class HomestayController {
     try {
       const homestay = await Homestay.findById(req.params.id);
       if (!homestay || homestay.images.length == 0) {
-        throw new Error();
+        res.status(400).send(e);
       } else {
         const image = await Image.findById(homestay.images[req.query.index]);
         res.set("Content-Type", "image/png");
@@ -73,7 +73,7 @@ class HomestayController {
     try {
       const homestay = await Homestay.findById(req.params.id);
       if (!homestay) {
-        throw new Error();
+        res.status(400).send(e);
       } else {
         const owner = await User.findById(homestay.owner);
         await owner
@@ -94,7 +94,11 @@ class HomestayController {
 
   async update(req, res) {
     const updates = Object.keys(req.body);
-    const homestay = await Homestay.findById(req.params.id);
+    const homestay = await Homestay.findOne({
+      _id: req.params.id,
+      owner: req.user._id,
+      isActive: true,
+    });
     try {
       updates.forEach((update) => (homestay[update] = req.body[update]));
       await homestay.save();
@@ -107,13 +111,16 @@ class HomestayController {
 
   async delete(req, res) {
     try {
-      const homestay = await Homestay.findByIdAndDelete({
+      const homestay = await Homestay.findOne({
         _id: req.params.id,
+        isActive: true,
         owner: req.user._id,
       });
       if (!homestay) {
-        return res.status(404).send();
+        throw new Error("Not found");
       }
+      homestay.isActive = false;
+      await homestay.save();
       res.status(200).send({
         message: "delete successfully",
       });
@@ -124,7 +131,10 @@ class HomestayController {
 
   async getList(req, res) {
     try {
-      const homestays = await Homestay.find({ owner: req.query.userid });
+      const homestays = await Homestay.find({
+        owner: req.query.userid,
+        isActive: true,
+      });
       res.status(200).send({ homestays: homestays });
     } catch (e) {
       res.status(400).send();

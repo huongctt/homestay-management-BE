@@ -33,5 +33,6 @@ router.get("/:id", HomestayController.getHomestay);
 router.get("/:id/images", HomestayController.getImage);
 // get homestays?userid=...
 router.get("", auth, HomestayController.getList);
+router.post("/:id/delete", auth, HomestayController.delete);
 
 module.exports = router;

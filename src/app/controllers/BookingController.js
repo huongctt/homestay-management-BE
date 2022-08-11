@@ -36,6 +36,7 @@ class BookingController {
       const homestays = await Homestay.find({
         city: req.body.city,
         price: { $gte: 0, $lte: req.body.price },
+        isActive: true,
         _id: { $nin: unavailable },
       });
       res.status(200).send({ user: req.user, homestays });
@@ -46,7 +47,13 @@ class BookingController {
 
   async book(req, res) {
     try {
-      const homestay = await Homestay.findById(req.params.id);
+      const homestay = await Homestay.findOne({
+        _id: req.params.id,
+        isActive: true,
+      });
+      if (!homestay) {
+        res.status(400).send();
+      }
       const booking = new Booking({
         ...req.body,
         user: req.user._id,
@@ -208,7 +215,7 @@ class BookingController {
     }
   }
 
-  async getBooking(req, res) {
+  async getBookingDetail(req, res) {
     try {
       const booking = await Booking.findById(req.params.id);
       await booking

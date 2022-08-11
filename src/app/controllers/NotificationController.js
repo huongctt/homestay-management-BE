@@ -14,6 +14,8 @@ class NotificationController {
         nt.seen = true;
         await nt.save();
       }
+
+      noti.sort((a, b) => b.createdAt - a.createdAt);
       res.status(200).send({ notifications: noti });
     } catch (e) {
       res.status(404).send();

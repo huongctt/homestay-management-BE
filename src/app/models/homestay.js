@@ -59,6 +59,10 @@ const Schema = new mongoose.Schema(
     pool: {
       type: Boolean,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

@@ -25,6 +25,10 @@ const Schema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    active: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

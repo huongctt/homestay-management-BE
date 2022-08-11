@@ -18,6 +18,11 @@ class DiscountController {
         discount.homestays.push(homestay);
       });
       await discount.save();
+      await discount
+        .populate({
+          path: "homestays",
+        })
+        .execPopulate();
       res.status(201).send({ discount });
     } catch (e) {
       res.status(400).send(e);
@@ -27,15 +32,16 @@ class DiscountController {
 
   async getAll(req, res) {
     try {
-      const discounts = await Discount.find({ user: req.user._id }).populate({
+      const discounts = await Discount.find({
+        user: req.user._id,
+      }).populate({
         path: "homestays",
       });
-      console.log({ a: discounts[0].homestays });
       const date = new Date();
 
       const { activeDiscounts, inactiveDiscounts } = discounts.reduce(
         (a, i) => {
-          if (i.checkout >= date) {
+          if (i.checkout >= date && i.active === true) {
             a.activeDiscounts.push(i);
           } else {
             a.inactiveDiscounts.push(i);
@@ -62,12 +68,14 @@ class DiscountController {
         discounts = await Discount.find({
           homestays: ObjectId(req.params.id),
           checkout: { $gte: date },
+          active: true,
         });
       } else {
         const checkin = req.query.checkin;
         const checkout = req.query.checkout;
         discounts = await Discount.find({
           homestays: ObjectId(req.params.id),
+          active: true,
           $or: [
             { checkin: { $gte: checkin, $lte: checkout } },
             {
@@ -84,6 +92,23 @@ class DiscountController {
       }
 
       res.status(200).send({ discounts });
+    } catch (e) {
+      res.status(400).send(e);
+      console.log(e);
+    }
+  }
+
+  async deactivate(req, res) {
+    try {
+      const discount = await Discount.findById(req.params.id);
+      if (discount.active === false) {
+        res.status(400).send(e);
+      } else {
+        discount.active = false;
+        await discount.save();
+      }
+
+      res.status(200).send({ discount });
     } catch (e) {
       res.status(400).send(e);
       console.log(e);

@@ -14,7 +14,7 @@ router.get(
   bookingController.getBookingByHomestay
 );
 router.get("/bookings/your-booking", auth, bookingController.getYourBooking);
-router.get("/bookings/:id", auth, bookingController.getBooking);
+router.get("/bookings/:id", auth, bookingController.getBookingDetail);
 //delete service booking
 router.delete("/service-bookings/:id", auth, bookingController.deleteService);
 module.exports = router;
