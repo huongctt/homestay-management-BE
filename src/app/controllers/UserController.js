@@ -7,6 +7,10 @@ class UserController {
       ...req.body,
     });
     try {
+      const userBefore = await User.findOne({ username: req.body.username });
+      if (userBefore) {
+        throw new Error("Please use another username");
+      }
       await user.save();
       const token = await user.generateAuthToken();
       res.status(201).send({

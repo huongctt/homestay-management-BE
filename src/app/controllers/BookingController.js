@@ -54,6 +54,28 @@ class BookingController {
       if (!homestay) {
         res.status(400).send();
       }
+      const checkintime = req.body.checkin;
+      const checkouttime = req.body.checkout;
+      const booked = await Booking.find({
+        $or: [
+          { checkin: { $gte: checkintime, $lte: checkouttime } },
+          {
+            checkout: { $gte: checkintime, $lte: checkouttime },
+          },
+          {
+            $and: [
+              { checkin: { $lte: checkintime } },
+              { checkout: { $gte: checkouttime } },
+            ],
+          },
+        ],
+        status: { $in: ["accepted", "stayed", "reviewed"] },
+        homestay: homestay._id,
+      });
+      console.log({ booked });
+      if (booked.length) {
+        throw new Error("Invalid checkin checkout time");
+      }
       const booking = new Booking({
         ...req.body,
         user: req.user._id,
@@ -65,7 +87,6 @@ class BookingController {
         discount.used = discount.used + 1;
         await discount.save();
       }
-      console.log({ booking });
       // var datecheckin = new Date(req.body.checkin);
       // var datecheckout = new Date(req.body.checkout);
       // var date = (datecheckout - datecheckin) / (60 * 60 * 24 * 1000);
@@ -219,15 +240,23 @@ class BookingController {
     try {
       const booking = await Booking.findById(req.params.id);
       await booking
-        .populate({
-          path: "user",
-        })
+        .populate([
+          {
+            path: "user",
+          },
+          {
+            path: "discount",
+          },
+          {
+            path: "homestay",
+          },
+        ])
         .execPopulate();
-      await booking
-        .populate({
-          path: "homestay",
-        })
-        .execPopulate();
+      // await booking
+      //   .populate({
+      //     path: "homestay",
+      //   })
+      //   .execPopulate();
 
       const services = await Service.find({ homestay: booking.homestay._id });
       const servicesBooking = await ServiceBooking.find({

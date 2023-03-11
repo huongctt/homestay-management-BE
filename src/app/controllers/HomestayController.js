@@ -1,5 +1,6 @@
 const express = require("express");
 const Homestay = require("../models/homestay.js");
+const Booking = require("../models/booking.js");
 const User = require("../models/user.js");
 const Review = require("../models/review.js");
 const Image = require("../models/image.js");
@@ -135,9 +136,21 @@ class HomestayController {
         owner: req.query.userid,
         isActive: true,
       });
-      res.status(200).send({ homestays: homestays });
+
+      const bookings = [];
+      for (const h of homestays) {
+        const book = await Booking.findOne({
+          homestay: h._id,
+          status: "requested",
+        });
+        if (book) {
+          bookings.push(h._id);
+        }
+      }
+      res.status(200).send({ homestays: homestays, bookings });
     } catch (e) {
       res.status(400).send();
+      console.log({ e });
     }
   }
 }
